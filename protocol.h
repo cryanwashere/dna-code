@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "array_t.h"
+
 struct Base4Protocol
 {
     char _0[1];
@@ -9,7 +11,8 @@ struct Base4Protocol
     char _3[1];
 };
 
-Base4Protocol getProtocol(char* path) {
+Base4Protocol
+getProtocol(char* path) {
    if (1) {
         // default protocol
 
@@ -29,9 +32,12 @@ Base4Protocol getProtocol(char* path) {
    }
 }
 
-char ** constructBaseNProtocol(Base4Protocol protocol, unsigned const int n) 
+array_t*
+constructBaseNProtocol(Base4Protocol protocol, unsigned const int n) 
 {
-   char** arrProtocol = malloc( (4^n) * sizeof(char[n]) );
+   
+    array_t *baseNProtocol = array_string_new(4^n, n);
+
    for (int i=0;i<4^n;i++) 
    {
         char seq[n];
@@ -55,7 +61,24 @@ char ** constructBaseNProtocol(Base4Protocol protocol, unsigned const int n)
                 strcat(seq,protocol._3);
             }
         }
-        strcpy(arrProtocol[i], seq);
+        array_string_set(baseNProtocol, i, seq);
    }
-   return arrProtocol;
+   return baseNProtocol;
+}
+
+
+char* 
+getProtocolSummary(array_t *protocol) {
+    char* summary = "Buffer pairing protocol:\n";
+    int protocol_len = array_string_len(protocol);
+    for (int i = 0;i < protocol_len; i++) 
+    {
+        char* number = (char*) i;
+        strcat(summary, number);
+        strcat(summary, " --> ");
+        char* seq = array_string_get(protocol, i);
+        strcat(summary, seq);
+        strcat(summary, "\n");
+    }
+    return summary; 
 }
