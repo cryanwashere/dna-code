@@ -3,7 +3,7 @@
 #include <string.h>
 
 int main(int argc, char **argv) {
-    unsigned char buffer[10];
+    unsigned char* buffer;
     FILE* ptr;
 
     ptr = fopen(argv[1],"rb");
@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
     fread(buffer,sizeof(buffer),1,ptr);
 
 
-    for (int i=0;i<10;i++) {
+    for (int i=0;i<sizeof(buffer);i++) {
         printf("%x ",buffer[i]);
     }
     
