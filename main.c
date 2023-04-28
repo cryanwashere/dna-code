@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
-// this is the protocol that is used to encode the bits into 
-// DNA
-#define prot {'A','T','C','G'}
 
 // take a byte, and encode it into four bases
 char * encode_char(unsigned char c) {
@@ -39,6 +38,7 @@ char * encode_char(unsigned char c) {
                 exit(1);
         }
     }
+    //printf("%02x %s\n", c, result);
     return result;
 }
 
@@ -82,21 +82,100 @@ char * encode_file(const char* filename) {
     return encoded_str;
 }
 
-int main(int argc, char *argv[]) {
-    
-    const char* filename = argv[1];
+unsigned char decode_char(char* encoded_byte) {
+    unsigned char result = 0;
 
-    printf("encoding file: %s\n", filename);
-    char * encoded_str = encode_file(filename);
-    if (encoded_str == NULL) {
-        fprintf(stderr, "Error: failed to encode file %s\n", filename);
-        return 1;
+    int i;
+    for(i = 0; i < 4; i++) {
+        unsigned char bits;
+        switch(encoded_byte[i]) {
+            case 'A':
+                bits = 0;
+                break;
+            case 'T':
+                bits = 1;
+                break;
+            case 'C':
+                bits = 2;
+                break;
+            case 'G':
+                bits = 3;
+                break;
+            default:
+                fprintf(stderr, "Error: invalid character in encoded byte: %c", encoded_byte[i]);
+                exit(1);
+        }
+        result |= bits << (2 * i);
     }
 
-    printf("DNA Encoded string: \n%s\n", encoded_str);
-    free(encoded_str);
-   
+    return result;
+}
+
+void decode_sequence(const char * str, const char * filename) {
+    FILE* fp = fopen(filename, "wb");
+    if (fp == NULL) {
+        fprintf(stderr, "Error: could not open file %s for writing\n", filename);
+        return;
+    }
+
+    // loop over the string, and write the corresponding byte to the output file
+    size_t len = strlen(str);
+    for (size_t i = 0; i < len; i+=4) {
+        
+        char encoded_byte[5];
+        strncpy(encoded_byte, str+i, 4);
+        encoded_byte[4] = '\0';
+
+        unsigned char byte = decode_char(encoded_byte);
+
+        //printf("%s %02x\n", encoded_byte, byte);
+
+        fwrite(&byte, sizeof(unsigned char), 1, fp);
+    }
+    fclose(fp);
+}
+
+int main(int argc, char *argv[]) {
     
+    if (argc < 2) {
+        printf("invalid argument");
+        return 0;
+    }
+
+    // encode a file
+    if (strcmp(argv[1], "encode") == 0) {
+        // the file path is the second argument
+        const char* filename = argv[2];
+        printf("encoding file: %s\n", filename);
+        char * encoded_str = encode_file(filename);
+        if (encoded_str == NULL) {
+            fprintf(stderr, "Error: failed to encode file %s\n", filename);
+            return 1;
+        }
+        printf("DNA Encoded string: \n%s\n", encoded_str);
+        free(encoded_str);
+        return 0;
+    }
     
+    // decode a sequence
+    if (strcmp(argv[1], "decode") == 0) {
+        
+        if (argc < 4) {
+            printf("decode: invalid arguments");
+            return 0;
+        }
+
+        const char * filename = argv[2];
+        const char * sequence = argv[3];
+
+        printf("decoding sequence to file %s:\n", filename);
+        decode_sequence(sequence, filename);
+
+        //unsigned char result = decode_char(sequence);
+        //printf("Decoded byte: %02x\n", result);
+        
+        return 0;
+    }
+
     return 0;
 }
