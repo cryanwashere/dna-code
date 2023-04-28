@@ -1,11 +1,13 @@
 # dna-code
 encode any file into a DNA sequence
 
-
-# installation/setup
-```bash
-$git clone https://github.com/cryanwashere/dna-code.git
-$cd dna-code
-$gcc $PWD/main.c -o dnacode
-$sudo ln -s $PWD/dnacode /usr/bin
-```
+'''bash
+gcc main.c -o dna
+./dna sample_data/message.txt
+'''
+output:
+'''
+encoding file: sample_data/message.txt
+DNA Encoded string: 
+ACCTTTCTAGCTAGCTGGCT
+'''
