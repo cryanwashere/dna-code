@@ -135,6 +135,17 @@ void decode_sequence(const char * str, const char * filename) {
     fclose(fp);
 }
 
+void write_string_to_file(char *filename, char *str) {
+    FILE *fp;
+    fp = fopen(filename, "w");
+    if (fp == NULL) {
+        printf("Error: could not open file %s for writing\n",filename);
+        return;
+    }
+    fprintf(fp, "%s", str);
+    fclose(fp);
+}
+
 int main(int argc, char *argv[]) {
     
     if (argc < 2) {
@@ -152,7 +163,21 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Error: failed to encode file %s\n", filename);
             return 1;
         }
-        printf("DNA Encoded string: \n%s\n", encoded_str);
+
+        if (argc == 5) {
+            const char* file_arg = argv[3];
+            // instead of printing the string write it to a file
+            if (strcmp(file_arg, "-f") == 0) {
+                char * write_filename = argv[4];
+                printf("writing output to %s\n", write_filename);
+                write_string_to_file(write_filename, encoded_str);
+            }
+        } else {
+            printf("DNA Encoded string: \n%s\n", encoded_str);
+        }
+
+
+        
         free(encoded_str);
         return 0;
     }
